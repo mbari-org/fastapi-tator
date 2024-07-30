@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+tator==1.2.3
+python-multipart
+httpx
+pytest
