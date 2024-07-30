@@ -1,5 +1,6 @@
 [![MBARI](https://www.mbari.org/wp-content/uploads/2014/11/logo-mbari-3b.png)](http://www.mbari.org)
 [![Python](https://img.shields.io/badge/language-Python-blue.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 **fastapi-tator** A RESTful API for bulk operations on a Tator database on clustered, labeled, localization data.
 It uses the Python web framework [FastAPI](https://fastapi.tiangolo.com/). 
@@ -77,4 +78,4 @@ Check the health of the server by going to `http://localhost:8000/health`.  You 
 
 ## Related work
  
-* https://github.com/mbari-org/sdcat
+* https://github.com/mbari-org/tator [MBARI fork of Tator with additional features]
