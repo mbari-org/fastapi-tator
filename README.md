@@ -79,3 +79,4 @@ Check the health of the server by going to `http://localhost:8000/health`.  You 
 ## Related work
  
 * https://github.com/mbari-org/tator [MBARI fork of Tator with additional features]
+* https://github.com/mbari-org/sdat [Sliced Detection and Clustering Analysis Toolkit]
