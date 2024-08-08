@@ -1,10 +1,12 @@
 # CHANGELOG
 
+## v0.1.1 (2024-08-08)
+
+### Fix
+
+* fix: correct conflicting names for getting projects ([`6ce93fc`](https://github.com/mbari-org/fastapi-tator/commit/6ce93fc03bf37b93e1ae3aca6c548cf095656562))
+
 ## v0.1.0 (2024-07-30)
-
-### Ci
-
-* ci: added release ([`ace8c5a`](https://github.com/mbari-org/fastapi-tator/commit/ace8c5ad4b11c236cc8f5de236fd684b4044fc13))
 
 ### Documentation
 
