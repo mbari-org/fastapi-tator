@@ -32,7 +32,8 @@ logger = logger.create_logger_file(temp_path / "logs")
 
 app = FastAPI(
     title="Bulk Tator API",
-    description=f"""Common bulk operations on the Tator API. Version {__version__}""",
+    description=f"""A RESTful API for bulk operations on a Tator database on clustered, labeled, localization data. 
+    Version {__version__}""",
     version=__version__,
 )
 
@@ -84,7 +85,7 @@ async def health():
 
 
 @app.get("/projects", status_code=status.HTTP_200_OK)
-async def get_projects():
+async def get_all_projects():
     all_projects = get_projects(api)
 
     if len(all_projects) == 0:
