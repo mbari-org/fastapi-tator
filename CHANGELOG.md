@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.2.0 (2024-08-08)
+
+### Feature
+
+* feat: added label counts to /labels/{project_name} ([`3d605c3`](https://github.com/mbari-org/fastapi-tator/commit/3d605c3767b961967da58ad2861d919f6e4c5b6e))
+
 ## v0.1.1 (2024-08-08)
 
 ### Fix
