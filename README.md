@@ -14,6 +14,7 @@ This API can, for example,
 -  Change a localization label in a given [sdcat](https://github.com/mbari-org/sdcat) generated cluster by query criteria, e.g. media (partial) name, model version
 -  Delete localizations with low saliency scores in a given project
 -  Report how many localizations for a given project are flagged for deletion
+-  Delete all localizations flagged for deletion in a given project
 
 --- 
 ![](https://raw.githubusercontent.com/mbari-org/fastapi-tator/main/docs/imgs/restwebui.png)
@@ -29,15 +30,17 @@ For development, you will need:
 - [Python >=3.12](https://www.python.org/downloads/)
 - [Anaconda](https://www.anaconda.com/)
 - [Docker](https://docs.docker.com/get-docker/)
-- [Docker Compose](https://docs.docker.com/compose/install/) 
+- [Docker Compose](https://docs.docker.com/compose/install/)
+- [Tator](http://github.com/mbari-org/tator)
 
 # Deployment
 
-## Clone the repository
+## Clone the repository and run the docker compose file
 
 ```shell
 git clone https://github.com/mbari-org/fastapi-tator
 cd fastapi-tator
+make tator
 ```
 
 ## Fetch your API key for Tator
@@ -78,5 +81,4 @@ Check the health of the server by going to `http://localhost:8000/health`.  You 
 
 ## Related work
  
-* https://github.com/mbari-org/tator [MBARI fork of Tator with additional features]
-* https://github.com/mbari-org/sdat [Sliced Detection and Clustering Analysis Toolkit]
+* https://github.com/mbari-org/sdcat [Sliced Detection and Clustering Analysis Toolkit]

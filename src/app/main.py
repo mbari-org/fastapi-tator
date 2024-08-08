@@ -99,10 +99,10 @@ async def get_all_projects():
 @app.get("/labels/{project_name}", status_code=status.HTTP_200_OK)
 async def get_label_list_slow_op(project_name: str):
     """
-    Get the list of unique labels associated with a Tator project.
+    Get the list of unique labels associated with a Tator project and the count of each label.
     :param project_name: the name of the project
     :param api: The Tator API object.
-    :return: A list of labels.
+    :return: A list of labels and the count of each label.
     """
     spec = get_project_spec(api, project_name)
 
@@ -112,14 +112,21 @@ async def get_label_list_slow_op(project_name: str):
     # Fetch the list of labels associated with the project
     num_boxes = api.get_localization_count(project=spec.project_id)
     unique_labels = set()
+    label_count = {}
     batch_size = 500
     for i in range(0, num_boxes, batch_size):
         localization_list = api.get_localization_list(project=spec.project_id, start=i, stop=i + batch_size)
         labels = set(loc.attributes["Label"] for loc in localization_list)
         unique_labels.update(labels)
+        for l in unique_labels:
+            if l not in label_count:
+                label_count[l] = 0
+
+            label_count[l] += sum(1 for loc in localization_list if loc.attributes["Label"] == l)
 
     info(f"Found {len(unique_labels)} unique label(s) in project {spec.project_id}")
-    return {"labels": [loc for loc in unique_labels]}
+    # Return a dictionary of labels/counts pairs
+    return {"labels": label_count}
 
 
 @app.post("/label/filename_cluster/{label}", status_code=status.HTTP_200_OK)
