@@ -21,8 +21,9 @@ from app.ops.models import (
     LocSaliencyFilterModel,
     MediaIdFilterModel,
     DeleteFlagFilterModel,
+    LocIdFilterModel,
 )
-from app.ops.modifications import assign_cluster_label
+from app.ops.modifications import assign_cluster_label, add_label_id
 from app.ops.utils import NotFoundException, init_api, get_projects, get_project_spec, get_version_id
 from app.ops.deletions import del_loc_cluster, del_locs_by_media_name, del_media_low_saliency, del_media_id, \
     del_loc_flag
@@ -127,6 +128,34 @@ async def get_label_list_slow_op(project_name: str):
     info(f"Found {len(unique_labels)} unique label(s) in project {spec.project_id}")
     # Return a dictionary of labels/counts pairs
     return {"labels": label_count}
+
+
+@app.post("/label/id/{label}", status_code=status.HTTP_200_OK)
+async def assign_label_by_id(
+        label: str, item: LocIdFilterModel, background_tasks: BackgroundTasks
+):
+    model = LocIdFilterModel(**jsonable_encoder(item))  # Convert to a model
+
+    spec = get_project_spec(api, model.project_name)
+
+    if spec.image_type is None:
+        return {"message": f"No image type found for project {model.project_name}"}
+
+    if spec.project_id is None:
+        return {"message": f"No project id found for project {model.project_name}"}
+
+    info(f"spec {spec}")
+
+    if model.dry_run:
+        found = api.get_localization(id=model.loc_id)
+        if found is None:
+            return {"message": f"No localizations found for id {model.loc_id}"}
+
+        info(f"Found localization")
+        return {"message": f"Found localization for id {model.loc_id} with label {found.attributes['Label']}"}
+    else:
+        background_tasks.add_task(add_label_id, model=model, api=api, label=label, spec=spec)
+        return {"message": f"Queued localization change for id {model.loc_id}"}
 
 
 @app.post("/label/filename_cluster/{label}", status_code=status.HTTP_200_OK)

@@ -4,8 +4,30 @@
 
 import tator
 from app.logger import info, exception, debug, err
-from app.ops.models import ProjectSpec, FilterType, LocClusterFilterModel
+from app.ops.models import ProjectSpec, FilterType, LocClusterFilterModel, LocIdFilterModel
 from app.ops.utils import get_version_id, get_media_ids
+
+
+async def add_label_id(label: str,model: LocIdFilterModel, api: tator.api, spec: ProjectSpec):
+    """
+    Add a label to a localization
+    :param label: label to set the localization to
+    :param model: model with criteria for deletions
+    :param spec: project specifications
+    :param api: tator api
+    """
+    info(f"Assigning localizations for {model.loc_id}  to {label}...")
+
+    # Update boxes by IDs, set verified to True
+    params = {"type": spec.box_type}
+    id_bulk_patch = {
+        "attributes": {"Label": label, "verified": True},
+        "ids": [model.loc_id],
+        "in_place": 1,
+    }
+    info(id_bulk_patch)
+    response = api.update_localization_list(project=spec.project_id, **params, localization_bulk_update=id_bulk_patch)
+    debug(response)
 
 
 async def assign_cluster_label(model: LocClusterFilterModel, label: str, api: tator.api, spec: ProjectSpec):

@@ -15,6 +15,7 @@ This API can, for example,
 -  Delete localizations with low saliency scores in a given project
 -  Report how many localizations for a given project are flagged for deletion
 -  Delete all localizations flagged for deletion in a given project
+-  Change a localization label for a particular database id
 
 --- 
 ![](https://raw.githubusercontent.com/mbari-org/fastapi-tator/main/docs/imgs/restwebui.png)

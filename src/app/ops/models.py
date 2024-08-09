@@ -33,6 +33,12 @@ class MediaNameFilterModel(BaseModel):
     dry_run: bool | None = True
 
 
+class LocIdFilterModel(BaseModel):
+    loc_id: int | None = None
+    project_name: str | None = default_project
+    dry_run: bool | None = True
+
+
 class MediaIdFilterModel(BaseModel):
     media_id: int | None = None
     project_name: str | None = default_project
