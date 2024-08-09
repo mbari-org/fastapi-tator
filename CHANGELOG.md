@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.3.0 (2024-08-09)
+
+### Feature
+
+* feat: added label change by database id ([`5f7480f`](https://github.com/mbari-org/fastapi-tator/commit/5f7480f66d12b94811a064131ccd4152ac722b12))
+
 ## v0.2.0 (2024-08-08)
 
 ### Feature
