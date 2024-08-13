@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.4.0 (2024-08-13)
+
+### Feature
+
+* feat: added optional localization score ([`11e190a`](https://github.com/mbari-org/fastapi-tator/commit/11e190a4ed91e09e0723d1a3b42ed51460e940b6))
+
 ## v0.3.0 (2024-08-09)
 
 ### Feature
