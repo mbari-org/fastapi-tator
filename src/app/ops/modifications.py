@@ -25,6 +25,9 @@ async def add_label_id(label: str,model: LocIdFilterModel, api: tator.api, spec:
         "ids": [model.loc_id],
         "in_place": 1,
     }
+    if model.score:
+        id_bulk_patch["attributes"]["score"] = model.score
+
     info(id_bulk_patch)
     response = api.update_localization_list(project=spec.project_id, **params, localization_bulk_update=id_bulk_patch)
     debug(response)
