@@ -2,7 +2,7 @@
 *.log
 
 # Secrets
-.env
+.env.*
 
 # Model weights
 *.pt
