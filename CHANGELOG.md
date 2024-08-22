@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.4.1 (2024-08-22)
+
+### Fix
+
+* fix: trigger release to update __init__.py ([`3a29b6d`](https://github.com/mbari-org/fastapi-tator/commit/3a29b6d1c9be805d9ca65feca84b7f467ed5d5e3))
+
 ## v0.4.0 (2024-08-13)
 
 ### Feature
