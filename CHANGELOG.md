@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.5.0 (2024-09-04)
+
+### Feature
+
+* feat: added support for loading by id and version ([`8ecf871`](https://github.com/mbari-org/fastapi-tator/commit/8ecf871ce34a3d5c0a0c28764d2eb7778625ee07))
+
 ## v0.4.1 (2024-08-22)
 
 ### Fix
