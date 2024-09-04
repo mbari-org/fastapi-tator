@@ -21,10 +21,12 @@ async def add_label_id(label: str,model: LocIdFilterModel, api: tator.api, spec:
     # Update boxes by IDs, set verified to True
     params = {"type": spec.box_type}
     id_bulk_patch = {
-        "attributes": {"Label": label, "verified": True},
+        "attributes": {"Label": label},
         "ids": [model.loc_id],
         "in_place": 1,
     }
+    if model.version_id:
+        id_bulk_patch["version"] = [model.version_id]
     if model.score:
         id_bulk_patch["attributes"]["score"] = model.score
 

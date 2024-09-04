@@ -37,6 +37,7 @@ class LocIdFilterModel(BaseModel):
     loc_id: int | None = None
     score: float | None = None
     project_name: str | None = default_project
+    version_id: int | None = None
     dry_run: bool | None = True
 
 
