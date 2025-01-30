@@ -8,6 +8,15 @@ set dotenv-filename := x'${ENV_FILE:-.env}'
 list:
     @just --list --unsorted
 
+# Build the docker images for linux/amd64 and linux/arm64 and push to Docker Hub
+build-and-push:
+    #!/usr/bin/env bash
+    echo "Building and pushing the Docker image"
+    RELEASE_VERSION=$(git describe --tags --abbrev=0)
+    docker buildx create --name mybuilder --platform linux/amd64,linux/arm64 --use
+    docker buildx build --sbom=true --provenance=true --push --platform linux/amd64,linux/arm64 -t mbari/fastapi-tator:$RELEASE_VERSION --build-arg IMAGE_URI=mbari/fastapi-tator:$RELEASE_VERSION -f Dockerfile .
+
+# Setup the development environment
 setup-dev:
     #!/usr/bin/env bash
     export PATH=$CONDA_PREFIX/bin:$PATH
@@ -15,6 +24,7 @@ setup-dev:
     echo "Creating a conda environment"
     conda env create
 
+# Run the FastAPI server for development
 run-dev:
     #!/usr/bin/env bash
     export PATH=$CONDA_PREFIX/bin:$PATH
