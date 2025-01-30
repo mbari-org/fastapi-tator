@@ -1,39 +1,21 @@
 # ================================================================
 #  Docker image for fastapi-tator
 #  ================================================================
-FROM ubuntu:20.04
+FROM python:3.12-slim AS base
 LABEL vendor="MBARI"
 LABEL maintainer="Danelle Cline dcline@mbari.org"
 LABEL license="Apache License 2.0"
 
 ARG IMAGE_URI=mbari/fastapi-tator
 
-ENV DEBIAN_FRONTEND=noninteractive
-RUN apt update -y && apt install -y software-properties-common && \
-    add-apt-repository -y ppa:deadsnakes/ppa &&  \
-    apt-get install -y git \
-	&& apt-get install -y build-essential \
-	&& apt-get install -y python3.12 \
-    && apt-get install -y python3-pip \
-	&& apt-get install -y python3.12-dev \
-	&& apt-get install -y python3.12-distutils \
-	&& apt-get install -y libgl1-mesa-glx \
-	&& apt-get install -y libglib2.0-0 \
-	&& apt-get install -y libncurses6 \
-    && apt-get install -y curl \
-    && curl -sS https://bootstrap.pypa.io/get-pip.py | python3.12 \
-    && python3.12 -m pip install --upgrade pip \
-    && apt-get clean
-
-
 ARG APP_DIR=/app
 WORKDIR $APP_DIR
 
-## setup virtualenv
+# setup virtualenv
 RUN pip install virtualenv
 RUN virtualenv $APP_DIR/env -p python3.12
-ENV VIRTUAL_ENV $APP_DIR/env
-ENV PATH $APP_DIR/env/bin:$PATH
+ENV VIRTUAL_ENV=$APP_DIR/env
+ENV PATH=$APP_DIR/env/bin:$PATH
 
 # install requirements and copy source
 ENV PYTHONPATH=$APP_DIR/src
