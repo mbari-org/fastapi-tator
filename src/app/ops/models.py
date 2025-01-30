@@ -12,6 +12,7 @@ class ProjectSpec(BaseModel):
     project_id: int | None = None
     box_type: int | None = None
     image_type: int | None = None
+    video_type: int | None = None
 
 
 @unique
@@ -25,19 +26,24 @@ class DeleteFlagFilterModel(BaseModel):
     project_name: str | None = default_project
     dry_run: bool | None = True
 
+class MediaNameFilterModelBase(BaseModel):
+    filter_media: str | None = FilterType.Equals
+    media_name: str | None = None
+    project_name: str | None = default_project
 
-class MediaNameFilterModel(BaseModel):
-    filter: str | None = FilterType.Equals
+class MediaNameFilterModel(MediaNameFilterModelBase):
+    dry_run: bool | None = True
+
+class MediaNameUnverifiedFilterModel(BaseModel):
+    filter_media: str | None = FilterType.Equals
     media_name: str | None = None
     project_name: str | None = default_project
     dry_run: bool | None = True
 
-
 class LocIdFilterModel(BaseModel):
     loc_id: int | None = None
-    score: float | None = None
+    score: float | None = 1.0
     project_name: str | None = default_project
-    version_id: int | None = None
     dry_run: bool | None = True
 
 
@@ -48,7 +54,7 @@ class MediaIdFilterModel(BaseModel):
 
 
 class LocClusterFilterModel(BaseModel):
-    filter_media: str | None = FilterType.Includes
+    filter_media: str | None = FilterType.Equals
     media_name: str | None = None
     cluster_name: str | None = None
     version_name: str | None = "Baseline"
@@ -56,10 +62,19 @@ class LocClusterFilterModel(BaseModel):
     dry_run: bool | None = True
 
 
-class LocSaliencyFilterModel(BaseModel):
-    filter_media: str | None = FilterType.Includes
+class LocLabelFilterModel(BaseModel):
+    filter_media: str | None = FilterType.Equals
+    media_name: str | None = None
+    label_name: str | None = "Unknown"
     version_name: str | None = "Baseline"
+    project_name: str | None = default_project
+    dry_run: bool | None = True
+
+class LocSaliencyLabelFilterModel(BaseModel):
+    filter_media: str | None = FilterType.Equals
     media_name: str | None = None
     saliency_value: int | None = None
+    label_name: str | None = "Unknown"
+    version_name: str | None = "Baseline"
     project_name: str | None = default_project
     dry_run: bool | None = True

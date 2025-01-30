@@ -8,9 +8,9 @@ from app.ops.models import ProjectSpec, FilterType, LocClusterFilterModel, LocId
 from app.ops.utils import get_version_id, get_media_ids
 
 
-async def add_label_id(label: str,model: LocIdFilterModel, api: tator.api, spec: ProjectSpec):
+async def change_label_id(label: str, model: LocIdFilterModel, api: tator.api, spec: ProjectSpec):
     """
-    Add a label to a localization
+    Change a label for a given localization ID
     :param label: label to set the localization to
     :param model: model with criteria for deletions
     :param spec: project specifications
@@ -25,14 +25,15 @@ async def add_label_id(label: str,model: LocIdFilterModel, api: tator.api, spec:
         "ids": [model.loc_id],
         "in_place": 1,
     }
-    if model.version_id:
-        id_bulk_patch["version"] = [model.version_id]
-    if model.score:
-        id_bulk_patch["attributes"]["score"] = model.score
+    if model.score is not None:
+        id_bulk_patch["attributes"] = {"Label": label, "score": model.score}
 
     info(id_bulk_patch)
-    response = api.update_localization_list(project=spec.project_id, **params, localization_bulk_update=id_bulk_patch)
-    debug(response)
+    try:
+        response = api.update_localization(project=spec.project_id, **params, localization_bulk_update=id_bulk_patch)
+        debug(response)
+    except Exception as e:
+        err(f"Failed to update localization {model.loc_id} with label {label}. Error: {e}")
 
 
 async def assign_cluster_label(model: LocClusterFilterModel, label: str, api: tator.api, spec: ProjectSpec):
@@ -52,7 +53,7 @@ async def assign_cluster_label(model: LocClusterFilterModel, label: str, api: ta
         info(f"Cluster name not provided")
         return
 
-    version_id = get_version_id(api, spec.project_id, model.version_name)
+    version_id = await get_version_id(api, spec.project_id, model.version_name)
     if version_id is None and len(model.version_name) > 0:
         info(f"Version {spec.version_name} not found in project {spec.project_name}")
         return
@@ -70,7 +71,7 @@ async def assign_cluster_label(model: LocClusterFilterModel, label: str, api: ta
             return
 
     debug(kwargs)
-    media_ids = get_media_ids(api=api, spec=spec, **kwargs)
+    media_ids = await get_media_ids(api=api, spec=spec, **kwargs)
     debug(f"Found {len(media_ids)} medias with {kwargs}...")
     if len(media_ids) == 0:
         info(f"No media found with {kwargs}")
@@ -95,7 +96,6 @@ async def assign_cluster_label(model: LocClusterFilterModel, label: str, api: ta
         debug(kwargs)
         localizations = api.get_localization_list(project=spec.project_id, type=spec.box_type, **kwargs)
 
-
         # only keep localizations that include the cluster name - this is a filter because
         # sometimes the query returns localizations that do not include the cluster name
         # this is a bug in the API
@@ -115,9 +115,12 @@ async def assign_cluster_label(model: LocClusterFilterModel, label: str, api: ta
             "ids": [l.id for l in localizations],
             "in_place": 1,
         }
-        info(id_bulk_patch)
-        response = api.update_localization_list(project=spec.project_id, **params, localization_bulk_update=id_bulk_patch)
-        debug(response)
+        try:
+            info(id_bulk_patch)
+            response = api.update_localization_list(project=spec.project_id, **params, localization_bulk_update=id_bulk_patch)
+            debug(response)
+        except Exception as e:
+            err(f"Failed to update localizations for media {i} to {i+batch_size} that include {model.cluster_name}. Error: {e}")
 
     info(f"Done. Changed {num_modified} localizations that include {attribute_media} "
          f"and {model.cluster_name} to {label}")

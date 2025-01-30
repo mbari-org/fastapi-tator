@@ -1,0 +1,108 @@
+# Get labels for a project #DONE
+GET http://127.0.0.1:8002/labels/i2map
+accept: application/json
+
+{
+  "labels": {
+    "RoboticArm": 1,
+    "Fish": 1,
+    "Urchin": 1
+  }
+}
+
+### Change Equipment label to RoboticArm OK. Tested score ranges, dry run, project_name missing DONE
+POST http://127.0.0.1:8002/label/id/RoboticArm
+accept: application/json
+Content-Type: application/json
+
+{
+  "loc_id": 22,
+  "score": 1.0,
+  "dry_run": false,
+  "project_name": "i2map"
+}
+
+### Test change video annotations on mp4 FOOFISH cluster to Fishy Test video, image, dryrun, different versions, equals, includes DONE
+POST http://127.0.0.1:8002/label/filename_cluster/Fish2
+accept: application/json
+Content-Type: application/json
+
+{
+  "filter_media": "Includes",
+  "media_name": "mp4",
+  "cluster_name": "FOOFISH",
+  "version_name": "Baseline2",
+  "project_name": "i2map",
+  "dry_run": false
+}
+
+### Count media with mp4
+POST http://127.0.0.1:8002/media_count_by_filename
+accept: application/json
+Content-Type: application/json
+
+{
+  "filter": "Includes",
+  "media_name": "jpg",
+  "project_name": "i2map",
+  "dry_run": false
+}
+
+### Count media with jpg
+POST http://127.0.0.1:8002/media_count_by_filename
+accept: application/json
+Content-Type: application/json
+
+{
+  "filter": "Includes",
+  "media_name": "mp4",
+  "project_name": "i2map"
+}
+
+### Delete unverified localizations in jpg media in i2map project
+DELETE http://127.0.0.1:8002/localizations/unverified/filename
+accept: application/json
+Content-Type: application/json
+
+{
+  "filter_media": "Includes",
+  "media_name": ".mp4",
+  "project_name": "i2map",
+  "dry_run": false
+}
+
+
+### Delete localizations by filename
+DELETE http://127.0.0.1:8002/localizations/filename
+accept: application/json
+Content-Type: application/json
+
+{
+  "filter_media": "Includes",
+  "media_name": "jpg",
+  "project_name": "i2map",
+  "dry_run": false
+}
+
+
+### Delete localizations by filename and label
+DELETE http://127.0.0.1:8002/localizations/filename
+accept: application/json
+Content-Type: application/json
+
+{
+  "filter_media": "Includes",
+  "media_name": "mp4",
+  "label": "Fish",
+  "project_name": "i2map",
+  "dry_run": true
+}
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,95 @@
+### Test delete video annotations on mp4 FOOFISH different versions. TESTED. If versions_name left off, defaults to Baseline; if version_name is empty "", then all versions are deleted.
+DELETE http://127.0.0.1:8002/localizations/filename_cluster
+accept: application/json
+Content-Type: application/json
+
+{
+  "filter_media": "Includes",
+  "media_name": "mp4",
+  "cluster_name": "FOOFISH",
+  "project_name": "i2map",
+  "version_name": "",
+  "dry_run": true
+}
+
+### Test delete video annotations on mp4 FOOFISH different versions. DONE
+DELETE http://127.0.0.1:8002/localizations/filename_label
+accept: application/json
+Content-Type: application/json
+
+{
+  "filter_media": "Includes",
+  "media_name": "",
+  "label_name": "Fish",
+  "project_name": "i2map",
+  "version_name": "",
+  "dry_run": true
+}
+
+
+### Test delete video annotations on low saliency different versions. DONE
+DELETE http://127.0.0.1:8002/localizations/filename_saliency
+accept: application/json
+Content-Type: application/json
+
+{
+  "filter_media": "Includes",
+  "media_name": "jpg",
+  "saliency_value": "301",
+  "project_name": "i2map",
+  "version_name": "",
+  "dry_run": true
+}
+
+### Test delete by id in different versions and media DONE
+DELETE http://127.0.0.1:8002/localizations/id
+accept: application/json
+Content-Type: application/json
+
+{
+  "media_id": 43,
+  "project_name": "i2map",
+  "version_name": "",
+  "dry_run": true
+}
+
+
+### Test delete by all flagged for deletions DONE
+DELETE http://127.0.0.1:8002/localizations/delete_flag
+accept: application/json
+Content-Type: application/json
+
+{
+  "project_name": "i2map",
+  "dry_run": true
+}
+
+
+### Remove the label Reflectance from a mission
+DELETE http://localhost:8001/localizations/filename_label
+Accept: application/json
+Content-Type: application/json
+
+{
+  "filter_media": "Equals",
+  "media_name": "trinity-2_20240725T201926_NewBrighton_DSC01745.JPG",
+  "label_name": "Reflectance",
+  "version_name": "MBARI/yolov5x6-uavs-oneclass-MBARI/mbari-uav-vit-b-16",
+  "project_name": "901902-uavs",
+  "dry_run": false
+}
+
+
+### Remove all batray from a mission
+DELETE http://localhost:8001/localizations/filename_label
+accept: application/json
+Content-Type: application/json
+
+{
+  "filter_media": "Includes",
+  "media_name": "trinity-2_20240809T233952_NewBrighton",
+  "label_name": "Batray",
+  "version_name": "MBARI/yolov5x6-uavs-oneclass-MBARI/mbari-uav-vit-b-16",
+  "project_name": "901902-uavs",
+  "dry_run": false
+}

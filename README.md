@@ -5,7 +5,7 @@
 **fastapi-tator** A RESTful API for bulk operations on a Tator database on clustered, labeled, localization data.
 It uses the Python web framework [FastAPI](https://fastapi.tiangolo.com/). 
 
-This accelerates machine learning workflows that use clustered, labeled, localization data with foundational models.
+This accelerates machine learning workflows that use clustered, labeled, localization data
 
 It is currently live at http://mantis.shore.mbari.org:8001/docs.
 
