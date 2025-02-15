@@ -1,6 +1,25 @@
 # CHANGELOG
 
 
+## v0.6.1 (2025-02-15)
+
+### Bug Fixes
+
+- Correct deletion flag which no longer requires a filter type
+  ([`1385832`](https://github.com/mbari-org/fastapi-tator/commit/1385832d6fc8e19d32bd5b9f204e36e1324de9b4))
+
+### Build System
+
+- Added provenance and SBOM to docker build - now have an A rating in docker hub :)
+  ([`48a4728`](https://github.com/mbari-org/fastapi-tator/commit/48a4728edd31d87b1cf2c803cc9a41036b6d5914))
+
+- Remove v from docker version tag
+  ([`59b1a40`](https://github.com/mbari-org/fastapi-tator/commit/59b1a40f1f9aeefea3266e90b8461db30ca9faa7))
+
+- Simpler docker build and fix test port for docker health check
+  ([`34502a6`](https://github.com/mbari-org/fastapi-tator/commit/34502a63b42c578478f3d95b7072953a52df27ec))
+
+
 ## v0.6.0 (2025-01-30)
 
 ### Features
