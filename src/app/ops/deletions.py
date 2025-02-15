@@ -27,7 +27,7 @@ async def del_media_id(model: MediaIdFilterModel, api: tator.api, spec: ProjectS
     info(f'Done. Deleted localizations for media {model.media_id} in project {spec.project_name}')
 
 
-async def del_locs(model: Any, spec: ProjectSpec, api: tator.api, allow_empty_media: bool, **kwargs):
+async def del_locs(model: Any, spec: ProjectSpec, api: tator.api, allow_empty_media: bool=False, **kwargs):
     """
     Paginated delete of localizations by a given filter
     :param allow_empty_media:  True if media can be empty - allows for deletion of all localizations across all media
@@ -50,7 +50,10 @@ async def del_locs(model: Any, spec: ProjectSpec, api: tator.api, allow_empty_me
     # Fetch localizations for media 100 at a time
     batch_size = min(100, len(media_ids))
     for i in range(0, len(media_ids), batch_size):
-        info(f"Deleting localizations for media {model.media_name} {i} to {i+batch_size}  ...")
+        if hasattr(model, "media_name"):
+            info(f"Deleting localizations for media {model.media_name} {i} to {i+batch_size}  ...")
+        else:
+            info(f"Deleting localizations for media {i} to {i+batch_size}  ...")
         info(kwargs)
         # https://www.tator.io/docs/references/tator-py/api
         deleted = api.delete_localization_list(

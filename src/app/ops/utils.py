@@ -21,6 +21,8 @@ class NotFoundException(Exception):
 def prepare_media_kwargs(model:Any, allow_empty_media:bool=False, attribute_prefix=None) -> dict | None:
     media_kwargs = {}
     debug(f"prepare_media_kwargs model: {model}")
+    if not hasattr(model, "filter_media"):
+        return media_kwargs
     media_filter_type = FilterType(model.filter_media)
 
     if len(model.media_name) == 0 and not allow_empty_media:
