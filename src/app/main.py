@@ -28,7 +28,7 @@ from app.ops.models import (
 from app.ops.modifications import assign_cluster_label, change_label_id
 from app.ops.utils import NotFoundException, init_api, get_all_projects, get_projects, get_image_spec_version, \
     get_project_spec, get_version_id, get_media_count, get_localization_count, prepare_media_kwargs, get_media_list, \
-    get_localization, get_label_counts, check_media_args
+    get_localization, get_label_counts_json, check_media_args
 from app.ops.deletions import del_media_id, del_locs
 
 # Initialize the logger
@@ -110,7 +110,7 @@ async def get_all_projects():
 
 
 @app.get("/labels/{project_name}", status_code=status.HTTP_200_OK)
-async def get_label_list_slow_op(project_name: str):
+async def get_label_list(project_name: str):
     """
     Get the list of unique labels associated with a Tator project and the count of each label.
     :param project_name: the name of the project
@@ -121,9 +121,9 @@ async def get_label_list_slow_op(project_name: str):
         spec = await get_project_spec(api, project_name)
     except NotFoundException as ex:
         return {"message": f"{ex._name} project not found. Is {ex._name} the correct project?"}, 404
- 
-    label_count = await get_label_counts(api, spec)
+
     # Return a dictionary of labels/counts pairs
+    label_count = await get_label_counts_json(spec.project_id)
     return {"labels": label_count} 
 
 

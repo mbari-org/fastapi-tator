@@ -3,6 +3,8 @@
 # Description: operations that modify the database
 
 import os
+
+import psycopg2
 import tator
 from tator.openapi.tator_openapi import TatorApi
 from typing import List, Tuple
@@ -226,33 +228,49 @@ async def get_media_list(api: tator.api, spec: ProjectSpec, media_type: int,  **
         exception(e)
         return []
 
-async def get_label_counts(api: tator.api, spec: ProjectSpec, **kwargs) -> dict:
+async def get_label_counts_json(project_id):
     """
-    Get the label counts for the project
-    :param api:  tator api
-    :param spec:  project specifications
-    :param kwargs:  filter arguments to pass to the get_localization_count function
-    :return: dictionary of label, count pairs
+    Get the label counts for a given project
+    :param project_id:
+    :return:  JSON object with label counts sorted by count in descending order
     """
-    try:
-        # Fetch the list of labels associated with the project
-        num_boxes = api.get_localization_count(project=spec.project_id, type=spec.box_type)
-        unique_labels = set()
-        label_count = {}
-        batch_size = 500
-        for i in range(0, num_boxes, batch_size):
-            localization_list = api.get_localization_list(project=spec.project_id, start=i, stop=i + batch_size)
-            labels = set(loc.attributes["Label"] for loc in localization_list)
-            unique_labels.update(labels)
-            for l in unique_labels:
-                if l not in label_count:
-                    label_count[l] = 0
+    dbname = os.environ.get("TATOR_DB_NAME", "tator_online")
+    user = os.environ.get("TATOR_DB_USER", "django")
+    password = os.environ.get("TATOR_DB_PASSWORD")
+    host = os.environ.get("TATOR_DB_HOST", "mantis.shore.mbari.org")
+    port = os.environ.get("TATOR_DB_PORT", "5432")
 
-                label_count[l] += sum(1 for loc in localization_list if loc.attributes["Label"] == l)
-        return label_count
+    try:
+        DB_PARAMS = {
+            "dbname": dbname,
+            "user": user,
+            "password": password,
+            "host": host,
+            "port": str(port),
+        }
+
+        query = """
+        SELECT jsonb_object_agg(label, count) AS labels
+        FROM (
+            SELECT attributes->>'Label' AS label, COUNT(*) AS count
+            FROM public.main_localization
+            WHERE attributes ? 'Label' AND project = %s
+            GROUP BY attributes->>'Label'
+        ) subquery;
+        """
+
+        with psycopg2.connect(**DB_PARAMS) as conn:
+            with conn.cursor() as cur:
+                cur.execute(query, (project_id,))
+                result = cur.fetchone()[0]
+        results = {"labels": result} if result else {"labels": {}}
+        result = dict(sorted(results["labels"].items(), key=lambda item: item[1], reverse=True))
+        return result
+
     except Exception as e:
-        exception(e)
-        return {}
+        print(f"Error: {e}")
+        return {"labels": {}}
+
 
 async def get_media_count(api: tator.api, spec: ProjectSpec, **kwargs) -> int:
     """
