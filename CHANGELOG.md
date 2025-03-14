@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.6.2 (2025-03-14)
+
+### Performance Improvements
+
+- Faster label query
+  ([`8b183e6`](https://github.com/mbari-org/fastapi-tator/commit/8b183e67e12eecb8a6371453e6ede6d6bbd58648))
+
+
 ## v0.6.1 (2025-02-15)
 
 ### Bug Fixes
