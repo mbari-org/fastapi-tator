@@ -52,8 +52,13 @@ class MediaIdFilterModel(BaseModel):
     project_name: str | None = default_project
     dry_run: bool | None = True
 
-
 class LocClusterFilterModel(BaseModel):
+    cluster_name: str | None = None
+    version_name: str | None = "Baseline"
+    project_name: str | None = default_project
+    dry_run: bool | None = True
+
+class LocMediaClusterFilterModel(BaseModel):
     filter_media: str | None = FilterType.Equals
     media_name: str | None = None
     cluster_name: str | None = None

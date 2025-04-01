@@ -17,15 +17,15 @@ from app import logger
 from app.ops.models import (
     FilterType,
     MediaNameFilterModel,
-    MediaNameUnverifiedFilterModel,
     LocLabelFilterModel,
-    LocClusterFilterModel,
+    LocMediaClusterFilterModel,
     LocSaliencyLabelFilterModel,
+    LocClusterFilterModel,
     MediaIdFilterModel,
     DeleteFlagFilterModel,
     LocIdFilterModel, MediaNameFilterModelBase,
 )
-from app.ops.modifications import assign_cluster_label, change_label_id
+from app.ops.modifications import assign_cluster_media_label, assign_cluster_label, change_label_id
 from app.ops.utils import NotFoundException, init_api, get_all_projects, get_projects, get_image_spec_version, \
     get_project_spec, get_version_id, get_media_count, get_localization_count, prepare_media_kwargs, get_media_list, \
     get_localization, get_label_counts_json, check_media_args
@@ -162,13 +162,67 @@ async def assign_label_by_id(
     except Exception as ex:
         return {"message": f"Error: {ex}"}
 
-
-@app.post("/label/filename_cluster/{label}", status_code=status.HTTP_200_OK)
-async def assign_label_by_media_filename_and_cluster(
+@app.post("/label/cluster/{label}", status_code=status.HTTP_200_OK)
+async def assign_label_by_cluster(
         label: str, model: LocClusterFilterModel, background_tasks: BackgroundTasks
 ):
     try:
         model = LocClusterFilterModel(**jsonable_encoder(model))
+
+        try:
+            spec = await get_project_spec(api, model.project_name)
+        except NotFoundException as ex:
+            return {"message": f"{ex._name} project not found. Is {ex._name} the correct project?"}, 404
+
+        if spec.image_type is None:
+            return {"message": f"No image type found for project {model.project_name}"}
+
+        if spec.project_id is None:
+            return {"message": f"No project id found for project {model.project_name}"}
+
+        version_id = await get_version_id(api, spec.project_id, model.version_name)
+
+        if version_id is None and len(model.version_name) > 0:
+            return {"message": f"No version found for project {model.project_name} with version {model.version_name}"}
+
+        attribute_cluster = [f"cluster::{model.cluster_name}"]
+        kwargs = {"related_attribute": attribute_cluster}
+
+        debug(f"kwargs {kwargs}")
+        num_media = await get_media_count(api, spec, **kwargs)
+
+        # Clear the kwargs and add the media name filter
+        kwargs.clear()
+        kwargs["attribute"] = [f"cluster::{model.cluster_name}"]
+        if version_id:
+            kwargs["version"] = [version_id]
+        num_boxes = await get_localization_count(api, spec, **kwargs)
+
+        if model.dry_run:
+            return {
+            "message": f'{num_boxes} unverified localizations in '
+                       f'cluster {model.cluster_name} and '
+                       f'{model.version_name if version_id else "all versions"} in {num_media} medias'
+        }
+        else:
+            if num_media == 0:
+                return {"message": f"No media found with {kwargs}"}
+            background_tasks.add_task(assign_cluster_label, label=label, model=model, api=api, spec=spec)
+            return {
+                "message": f"Queued modification of localizations in cluster {model.cluster_name} and "
+                           f'{model.version_name if version_id else "all versions"} to label {label}'
+            }
+    except Exception as ex:
+        return {"message": f"Error: {ex}"}
+
+
+
+@app.post("/label/filename_cluster/{label}", status_code=status.HTTP_200_OK)
+async def assign_label_by_media_filename_and_cluster(
+        label: str, model: LocMediaClusterFilterModel, background_tasks: BackgroundTasks
+):
+    try:
+        model = LocMediaClusterFilterModel(**jsonable_encoder(model))
         try:
             media_filter_type = FilterType(model.filter_media)
         except ValueError:
@@ -233,7 +287,7 @@ async def assign_label_by_media_filename_and_cluster(
         else:
             if num_media == 0:
                 return {"message": f"No media found with {kwargs}"}
-            background_tasks.add_task(assign_cluster_label, label=label, model=model, api=api, spec=spec)
+            background_tasks.add_task(assign_cluster_media_label, label=label, model=model, api=api, spec=spec)
             return {
                 "message": f"Queued modification of localizations by filename {model.media_name} and cluster {model.cluster_name} to label {label}"
             }
@@ -382,10 +436,10 @@ async def delete_localizations_by_media_filename_and_label(
 
 @app.delete("/localizations/filename_cluster", status_code=status.HTTP_200_OK)
 async def delete_localizations_by_media_filename_and_cluster(
-        model: LocClusterFilterModel, background_tasks: BackgroundTasks
+        model: LocMediaClusterFilterModel, background_tasks: BackgroundTasks
 ):
     try:
-        model = LocClusterFilterModel(**jsonable_encoder(model))
+        model = LocMediaClusterFilterModel(**jsonable_encoder(model))
         try:
             media_filter_type = FilterType(model.filter_media)
         except ValueError:
