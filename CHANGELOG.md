@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.7.0 (2025-04-01)
+
+### Features
+
+- Added support for bulk change by cluster name and version only
+  ([`2b49cfb`](https://github.com/mbari-org/fastapi-tator/commit/2b49cfb5f9cf4ed0a326effb9cdadf362732897d))
+
+
 ## v0.6.2 (2025-03-14)
 
 ### Performance Improvements
