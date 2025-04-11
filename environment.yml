@@ -2,8 +2,7 @@ name: fastapi-tator
 channels:
   - conda-forge
 dependencies:
-  - python>=3.12
+  - python==3.10
   - pip
   - pip:
-    - awscli
     - -r src/requirements.txt

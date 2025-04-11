@@ -39,9 +39,11 @@ For development, you will need:
 ## Clone the repository and run the docker compose file
 
 ```shell
-git clone https://github.com/mbari-org/fastapi-tator
+git clone --recurse-submodules https://github.com/mbari-org/fastapi-tator
 cd fastapi-tator
+cp example-env .env
 make tator
+make superuser
 ```
 
 ## Fetch your API key for Tator

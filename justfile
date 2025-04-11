@@ -22,9 +22,14 @@ build-and-push:
 setup-dev:
     #!/usr/bin/env bash
     export PATH=$CONDA_PREFIX/bin:$PATH
-    echo "Setting up development environment"
-    echo "Creating a conda environment"
-    conda env create
+    # If running on MacOS, need freetds to install pymssql
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        echo "Installing freetds"
+        brew install freetds
+    fi
+    echo "Installing development dependencies"
+    conda env update -n fastapi-tator --file environment-dev.yml
+    conda env update -n fastapi-tator --file environment.yml
 
 # Run the FastAPI server for development
 run-dev:
