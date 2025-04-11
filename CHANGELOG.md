@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.7.2 (2025-04-11)
+
+### Bug Fixes
+
+- Handle exceptions in GET labels/<project>
+  ([`ef92bf7`](https://github.com/mbari-org/fastapi-tator/commit/ef92bf75996241c20a85380eb9862674435a0ba0))
+
+
 ## v0.7.1 (2025-04-11)
 
 ### Bug Fixes
