@@ -323,7 +323,7 @@ async def media_count_by_media_filename(item: MediaNameFilterModelBase):
 
     return {
         "message": f"Found {num_media} medias that "
-                   f"{'include' if media_filter_type == FilterType.Includes else "equals"} "
+                   f"{'include' if media_filter_type == FilterType.Includes else 'equals'} "
                    f"{model.media_name}"
     }
 
@@ -375,7 +375,7 @@ async def localizations_by_media_filename(item: MediaNameFilterModel, background
     if model.dry_run:
         return {
         "message": f"Found {num_media} medias that "
-                   f"{'include' if media_filter_type == FilterType.Includes else "equals"} "
+                   f"{'include' if media_filter_type == FilterType.Includes else 'equals'} "
                    f"{model.media_name} with {num_boxes} unverified localizations"
     }
     else:
