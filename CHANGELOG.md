@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v0.7.1 (2025-04-11)
+
+### Bug Fixes
+
+- Correct return message formatting
+  ([`371e728`](https://github.com/mbari-org/fastapi-tator/commit/371e728bb85065e8099a31f3af4732d11d08ccdb))
+
+### Build System
+
+- Pin to py3.10 and better recipes for install on MacOS for pysql
+  ([`0a02a5f`](https://github.com/mbari-org/fastapi-tator/commit/0a02a5fabab4fb25f568707665579bd1da325eb7))
+
+
 ## v0.7.0 (2025-04-01)
 
 ### Features
