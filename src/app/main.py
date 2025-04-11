@@ -122,9 +122,12 @@ async def get_label_list(project_name: str):
     except NotFoundException as ex:
         return {"message": f"{ex._name} project not found. Is {ex._name} the correct project?"}, 404
 
-    # Return a dictionary of labels/counts pairs
-    label_count = await get_label_counts_json(spec.project_id)
-    return {"labels": label_count} 
+    try:
+        # Return a dictionary of labels/counts pairs
+        label_count = await get_label_counts_json(spec.project_id)
+        return {"labels": label_count}
+    except Exception as ex:
+        return {"message": f"Error: {ex}"}
 
 
 @app.post("/label/id/{label}", status_code=status.HTTP_200_OK)
