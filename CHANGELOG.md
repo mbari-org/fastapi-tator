@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.7.3 (2025-04-14)
+
+### Performance Improvements
+
+- Add context manager for running init and only report verified labels for speed-up
+  ([`fbf4ae3`](https://github.com/mbari-org/fastapi-tator/commit/fbf4ae392a7bb223cd58a42ddcfdadc601467064))
+
+
 ## v0.7.2 (2025-04-11)
 
 ### Bug Fixes
