@@ -2,7 +2,7 @@
 # Filename: app/main.py
 # Description: Runs a FastAPI server for common bulk operations on tator
 
-import signal
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, status, Request, BackgroundTasks
 from fastapi.encoders import jsonable_encoder
@@ -26,25 +26,15 @@ from app.ops.models import (
     LocIdFilterModel, MediaNameFilterModelBase,
 )
 from app.ops.modifications import assign_cluster_media_label, assign_cluster_label, change_label_id
-from app.ops.utils import NotFoundException, init_api, get_all_projects, get_projects, get_image_spec_version, \
+from app.ops.utils import NotFoundException, init_api, get_projects, get_image_spec_version, \
     get_project_spec, get_version_id, get_media_count, get_localization_count, prepare_media_kwargs, get_media_list, \
-    get_localization, get_label_counts_json, check_media_args
+    get_localization, get_label_counts_json, check_media_args, get_tator_projects
 from app.ops.deletions import del_media_id, del_locs
-
-# Initialize the logger
-logger = logger.create_logger_file(temp_path / "logs")
-
-app = FastAPI(
-    title="Bulk Tator API",
-    description=f"""A RESTful API for bulk operations on a Tator database on clustered, labeled, localization data. 
-    Version {__version__}""",
-    version=__version__,
-)
 
 global projects
 shutdown_flag = False
-logger = create_logger_file(temp_path / "logs")
-
+init_flag = False
+api = None
 
 # Define a function to handle the SIGINT signal (Ctrl+C)
 def handle_sigint(signum, frame):
@@ -54,15 +44,28 @@ def handle_sigint(signum, frame):
     shutdown_flag = False
 
 
-# Set up the signal handler for SIGINT
-signal.signal(signal.SIGINT, handle_sigint)
+async def handle_init():
+    global api, init_flag, projects
+    try:
+        api = init_api()  # sync? or make async if needed
+        projects = await get_tator_projects(api)
+        init_flag = True
+        logger.info("Initialization complete.")
+    except Exception as ex:
+        print(f"Error during initialization: {ex}")
 
-# Connect to the database api and fetch the projects
-api = init_api()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await handle_init()
+    yield
 
-# Fetch the projects
-get_all_projects(api)
-
+app = FastAPI(
+    title="Bulk Tator API",
+    description=f"""A RESTful API for bulk operations on a Tator database on clustered, labeled, localization data. 
+    Version {__version__}""",
+    version=__version__,
+    lifespan=lifespan
+)
 
 # Exception handler for 404 errors
 @app.exception_handler(NotFoundException)
@@ -127,7 +130,7 @@ async def get_label_list(project_name: str):
         label_count = await get_label_counts_json(spec.project_id)
         return {"labels": label_count}
     except Exception as ex:
-        return {"message": f"Error: {ex}"}
+        return {"message": f"Error: {ex}"}, 404
 
 
 @app.post("/label/id/{label}", status_code=status.HTTP_200_OK)

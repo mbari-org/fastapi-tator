@@ -53,6 +53,7 @@ def init_api() -> tator.api:
     Initialize the Tator API object. Requires TATOR_API_HOST and TATOR_API_TOKEN to be set in the environment.
     :return: Tator API object
     """
+    info("Connecting to Tator API...")
     if "TATOR_API_HOST" not in os.environ:
         exception("TATOR_API_HOST not found in environment variables!")
         raise Exception("TATOR_API_HOST not found in environment variables!")
@@ -71,7 +72,7 @@ def init_api() -> tator.api:
         print(e)
         exit(-1)
 
-def get_all_projects(api: tator.api) -> List[tator.models.Project]:
+async def get_tator_projects(api: tator.api) -> List[tator.models.Project]:
     """
     Get all projects from the Tator API
     :param api: The Tator API object
@@ -88,7 +89,7 @@ async def get_projects(tator_api: TatorApi):
     Fetch the projects from the database
     :return:
     """
-    projects_ = get_all_projects(tator_api)
+    projects_ = await get_tator_projects(tator_api)
     if len(projects_) == 0:
         info("No projects found")
         return
@@ -161,40 +162,45 @@ async def get_project_spec(api: tator.api, project_name: str) -> ProjectSpec:
     :return: The project spec
     """
     global projects
+    try:
 
-    project = next((p for p in projects if p.name == project_name), None)
-    if project is None:
-        info(f"Project {project_name} not found")
+        project = next((p for p in projects if p.name == project_name), None)
+        if project is None:
+            info(f"Project {project_name} not found")
+            raise NotFoundException(name=project_name)
+
+        # Get the box localization type for the project
+        localization_types = api.get_localization_type_list(project=project.id)
+
+        # The box type is the one with the name 'Boxes'
+        box_type = None
+        for loc in localization_types:
+            name_lower = loc.name.lower()
+            if name_lower == "boxes" or name_lower == "box":
+                box_type = loc.id
+                info(f"Found box type {box_type}")
+                break
+
+        # Get the image and video media type for the project
+        media_types = api.get_media_type_list(project=project.id)
+        image_type = None
+        video_type = None
+        for m in media_types:
+            info(f"Found media type {m.name} in project {project.name}")
+            m_lower = m.name.lower()
+            if m_lower == "images" or m_lower == "image":
+                image_type = m.id
+                info(f"Found image type {image_type}")
+
+            if m_lower == "videos" or m_lower == "video":
+                video_type = m.id
+                info(f"Found video type {video_type}")
+
+        return ProjectSpec(project_name=project.name, project_id=project.id, image_type=image_type, video_type=video_type, box_type=box_type)
+    except Exception as e:
+        exception(e)
         raise NotFoundException(name=project_name)
 
-    # Get the box localization type for the project
-    localization_types = api.get_localization_type_list(project=project.id)
-
-    # The box type is the one with the name 'Boxes'
-    box_type = None
-    for loc in localization_types:
-        name_lower = loc.name.lower()
-        if name_lower == "boxes" or name_lower == "box":
-            box_type = loc.id
-            info(f"Found box type {box_type}")
-            break
-
-    # Get the image and video media type for the project
-    media_types = api.get_media_type_list(project=project.id)
-    image_type = None
-    video_type = None
-    for m in media_types:
-        info(f"Found media type {m.name} in project {project.name}")
-        m_lower = m.name.lower()
-        if m_lower == "images" or m_lower == "image":
-            image_type = m.id
-            info(f"Found image type {image_type}")
-
-        if m_lower == "videos" or m_lower == "video":
-            video_type = m.id
-            info(f"Found video type {video_type}")
-
-    return ProjectSpec(project_name=project.name, project_id=project.id, image_type=image_type, video_type=video_type, box_type=box_type)
 
 async def get_localization_count(api: tator.api, spec: ProjectSpec, **kwargs) -> int:
     """
@@ -254,7 +260,7 @@ async def get_label_counts_json(project_id):
         FROM (
             SELECT attributes->>'Label' AS label, COUNT(*) AS count
             FROM public.main_localization
-            WHERE attributes ? 'Label' AND project = %s
+            WHERE attributes ? 'Label' AND project = %s AND attributes->>'verified' = 'true'
             GROUP BY attributes->>'Label'
         ) subquery;
         """
