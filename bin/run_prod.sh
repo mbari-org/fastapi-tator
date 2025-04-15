@@ -12,4 +12,6 @@ export $(grep -v '^#' $BASE_DIR/.env |  xargs)
 git_hash=$(git log -1 --format=%h)
 
 # Run the production compose stack
-GIT_VERSION="${git_hash}" COMPOSE_PROJECT_NAME=fastapi-tator docker-compose -f compose.yml up -d
+#GIT_VERSION="${git_hash}" COMPOSE_PROJECT_NAME=fastapi-tator docker-compose -f compose.yml up -d
+
+GIT_VERSION=latest COMPOSE_PROJECT_NAME=fastapi-tator docker-compose -f compose.yml up -d

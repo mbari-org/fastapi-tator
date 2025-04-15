@@ -9,7 +9,7 @@ services:
     image: mbari/fastapi-tator:${GIT_VERSION}
     container_name: fastapi-tator
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://127.0.0.1:8001/health"]
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
     env_file:
       - ./.env
     ports:

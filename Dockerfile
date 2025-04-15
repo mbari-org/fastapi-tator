@@ -6,6 +6,9 @@ LABEL vendor="MBARI"
 LABEL maintainer="Danelle Cline dcline@mbari.org"
 LABEL license="Apache License 2.0"
 
+# Install curl as needed for healthcheck
+RUN apt-get update && apt-get install -y curl
+
 ARG IMAGE_URI=mbari/fastapi-tator
 
 ARG APP_DIR=/app
