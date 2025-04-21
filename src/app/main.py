@@ -9,9 +9,8 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from fastapi.openapi.utils import get_openapi
 
-from app.conf import temp_path
 from app import __version__
-from app.logger import info, debug, create_logger_file
+from app.logger import info, debug
 from app import logger
 
 from app.ops.models import (
