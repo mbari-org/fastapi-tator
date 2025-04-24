@@ -3,6 +3,7 @@
 # Description: Runs a FastAPI server for common bulk operations on tator
 
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, status, Request, BackgroundTasks
 from fastapi.encoders import jsonable_encoder
@@ -10,7 +11,7 @@ from fastapi.responses import JSONResponse
 from fastapi.openapi.utils import get_openapi
 
 from app import __version__
-from app.logger import info, debug
+from app.logger import info, debug, create_logger_file
 from app import logger
 
 from app.ops.models import (
@@ -34,6 +35,7 @@ global projects
 shutdown_flag = False
 init_flag = False
 api = None
+create_logger_file(Path.home() / "tator_api" / "logs", "TATOR_API")
 
 # Define a function to handle the SIGINT signal (Ctrl+C)
 def handle_sigint(signum, frame):
