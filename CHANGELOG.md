@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.7.4 (2025-04-24)
+
+### Performance Improvements
+
+- Add explicit logger file and try catch wrap on deletions.py
+  ([`610afdb`](https://github.com/mbari-org/fastapi-tator/commit/610afdb4a00f5968401ee5b7c043e63c8e692d60))
+
+
 ## v0.7.3 (2025-04-14)
 
 ### Performance Improvements
