@@ -36,7 +36,7 @@ run-dev:
     #!/usr/bin/env bash
     export PATH=$CONDA_PREFIX/bin:$PATH
     export PYTHONPATH=$PWD/src
-    killall -9 uvicorn
+    ps -ef | grep '^.* uvicorn' | awk '{print $2}' | xargs kill -9
     echo "FastAPI server running at http://localhost:8002"
     echo "FastAPI docs running at http://localhost:8002/docs"
     cd src/app && conda run -n fastapi-tator --no-capture-output uvicorn main:app --port 8002 --reload
