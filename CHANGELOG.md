@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.7.5 (2025-04-25)
+
+### Bug Fixes
+
+- Correct deletion by filename endpoint and some refactored renaming for clarity
+  ([`b41228f`](https://github.com/mbari-org/fastapi-tator/commit/b41228f4d4b9fdb35b389b3bd7dc194084ddb943))
+
+
 ## v0.7.4 (2025-04-24)
 
 ### Performance Improvements
