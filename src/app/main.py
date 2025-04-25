@@ -29,7 +29,7 @@ from app.ops.modifications import assign_cluster_media_label, assign_cluster_lab
 from app.ops.utils import NotFoundException, init_api, get_projects, get_image_spec_version, \
     get_project_spec, get_version_id, get_media_count, get_localization_count, prepare_media_kwargs, get_media_list, \
     get_localization, get_label_counts_json, check_media_args, get_tator_projects
-from app.ops.deletions import del_media_id, del_locs
+from app.ops.deletions import del_media_id, del_locs_by_filter, del_locs_filename
 
 global projects
 shutdown_flag = False
@@ -386,7 +386,7 @@ async def localizations_by_media_filename(item: MediaNameFilterModel, background
                    f"{model.media_name} with {num_boxes} unverified localizations"
     }
     else:
-        background_tasks.add_task(del_locs, model=model, api=api, spec=spec, kwargs=loc_kwargs)
+        background_tasks.add_task(del_locs_filename, model=model, api=api, spec=spec, **loc_kwargs)
         return {"message": f"Queued deletion of localizations in medias by filename {model.media_name}"}
 
 @app.delete("/localizations/filename_label", status_code=status.HTTP_200_OK)
@@ -436,7 +436,7 @@ async def delete_localizations_by_media_filename_and_label(
             }
         else:
             kwargs = {"attribute": [f"Label::{model.label_name}", "verified::False"]}
-            background_tasks.add_task(del_locs, allow_empty_media=True, model=model, api=api, spec=spec, **kwargs)
+            background_tasks.add_task(del_locs_by_filter, allow_empty_media=True, model=model, api=api, spec=spec, **kwargs)
             return {"message": f"Queued deletion by name {model.media_name} and label {model.label_name}"}
     except Exception as ex:
         return {"message": f"Error: {ex}"}
@@ -484,7 +484,7 @@ async def delete_localizations_by_media_filename_and_cluster(
             }
         else:
             kwargs = {"attribute": [f"cluster::{model.cluster_name}", "verified::False"]}
-            background_tasks.add_task(del_locs, allow_empty_media=True, model=model, api=api, spec=spec, **kwargs)
+            background_tasks.add_task(del_locs_by_filter, allow_empty_media=True, model=model, api=api, spec=spec, **kwargs)
             return {"message": f"Queued deletion by name {model.media_name} and cluster {model.cluster_name}"}
     except Exception as ex:
         return {"message": f"Error: {ex}"}
@@ -537,7 +537,7 @@ async def delete_localizations_by_media_filename_and_low_saliency(
             }
         else:
             kwargs = {"attribute_lt": [f"saliency::{model.saliency_value}"], "attribute": [f"verified::False"]}
-            background_tasks.add_task(del_locs, allow_empty_media=True, model=model, api=api, spec=spec, **kwargs)
+            background_tasks.add_task(del_locs_by_filter, allow_empty_media=True, model=model, api=api, spec=spec, **kwargs)
             return {"message": f"Queued deletion by name {model.media_name} and {loc_kwargs}"}
     except Exception as ex:
         return {"message": f"Error: {ex}"}
@@ -602,7 +602,7 @@ async def delete_localizations_flagged_for_deletion(item: DeleteFlagFilterModel,
         if model.dry_run:
             return {"message": f"Found {num_boxes} unverified localizations in {num_media} medias flagged for deletion"}
         else:
-            background_tasks.add_task(del_locs, model=model, api=api, spec=spec, **loc_kwargs)
+            background_tasks.add_task(del_locs_by_filter, model=model, api=api, spec=spec, **loc_kwargs)
             return {"message": f"Queued deletion of localizations in medias flagged for deletion"}
     except Exception as ex:
         return {"message": f"Error: {ex}"}
