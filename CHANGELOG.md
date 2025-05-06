@@ -1,6 +1,15 @@
 # CHANGELOG
 
 
+## v0.8.0 (2025-05-06)
+
+### Features
+
+- Added support for getting unique label detail per version and cluster excluding unknown clusters
+  for reporting
+  ([`6ee39d0`](https://github.com/mbari-org/fastapi-tator/commit/6ee39d0a1cf2331a9d2bd8dec7103740bd153cbf))
+
+
 ## v0.7.5 (2025-04-25)
 
 ### Bug Fixes
