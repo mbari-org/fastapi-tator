@@ -25,4 +25,4 @@ jobs:
           export RELEASE_VERSION=$(echo ${{ steps.semantic.outputs.tag }} | cut -c 2-)
           docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
           docker buildx create --name mybuilder --platform linux/amd64,linux/arm64 --use
-          docker buildx build --push --platform linux/amd64,linux/arm64 -t mbari/fastapi-tator:$RELEASE_VERSION --build-arg IMAGE_URI=mbari/fastapi-tator:$RELEASE_VERSION -f Dockerfile .
+          docker buildx build --sbom=true --provenance=true --push --platform linux/amd64,linux/arm64 -t mbari/fastapi-tator:$RELEASE_VERSION --build-arg IMAGE_URI=mbari/fastapi-tator:$RELEASE_VERSION -f Dockerfile .
