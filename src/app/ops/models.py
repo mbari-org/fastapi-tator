@@ -40,6 +40,10 @@ class MediaNameUnverifiedFilterModel(BaseModel):
     project_name: str | None = default_project
     dry_run: bool | None = True
 
+class LabelFilterModel(BaseModel):
+    version_name: str | None = "Baseline"
+    attribute: str | None = None
+
 class LocIdFilterModel(BaseModel):
     loc_id: int | None = None
     score: float | None = 1.0

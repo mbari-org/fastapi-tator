@@ -234,9 +234,92 @@ async def get_media_list(api: tator.api, spec: ProjectSpec, media_type: int,  **
         exception(e)
         return []
 
+async def get_label_counts_cluster(project_id: int, version_id: int, attribute: str = None) -> List[Tuple[str, int]]:
+    """
+    Get the label counts for a given project that exist in a cluster, version, and optional attribute, e.g. depth, altitude, etc.
+    :param project_id:  project id
+    :param version_id:  version id
+    :param attribute:  attribute to filter on
+    :return:  list of tuples with label and count
+    """
+    """
+    Get the label counts for a given project for all verified localizations
+    :param project_id:
+    :return:  JSON object with label counts sorted by count in descending order
+    """
+    dbname = os.environ.get("TATOR_DB_NAME", "tator_online")
+    user = os.environ.get("TATOR_DB_USER", "django")
+    password = os.environ.get("TATOR_DB_PASSWORD")
+    host = os.environ.get("TATOR_DB_HOST", "mantis.shore.mbari.org")
+    port = os.environ.get("TATOR_DB_PORT", "5432")
+
+    try:
+        DB_PARAMS = {
+            "dbname": dbname,
+            "user": user,
+            "password": password,
+            "host": host,
+            "port": str(port),
+        }
+
+        if attribute is not None:
+            query = """
+                SELECT 
+                    attributes->>'Label' AS label,
+                    attributes->>%s AS a,
+                    COUNT(*) AS count
+                FROM public.main_localization
+                WHERE attributes ? 'Label' 
+                  AND attributes ? %s
+                  AND project = %s 
+                  AND version = %s  
+                  AND attributes->>'cluster' NOT LIKE '%%C-1%%'
+                GROUP BY attributes->>'Label', attributes->>%s;
+                """
+
+            with psycopg2.connect(**DB_PARAMS) as conn:
+                with conn.cursor() as cur:
+                    cur.execute(query, ( str(attribute), str(attribute), project_id, str(version_id), str(attribute)))
+                    rows = cur.fetchall()
+
+            nested_result = {}
+            for label, a, count in rows:
+                if label not in nested_result:
+                    nested_result[label] = {}
+                nested_result[label][a] = count
+
+            return nested_result
+
+        else:
+
+            query = """
+            SELECT jsonb_object_agg(label, count) AS labels
+            FROM (
+                SELECT attributes->>'Label' AS label, COUNT(*) AS count
+                FROM public.main_localization
+                WHERE attributes ? 'Label'
+                  AND project = %s 
+                  AND version = %s  
+                  AND attributes->>'cluster' NOT LIKE '%%C-1%%'
+                GROUP BY attributes->>'Label'
+            ) subquery;
+            """
+
+            with psycopg2.connect(**DB_PARAMS) as conn:
+                with conn.cursor() as cur:
+                    cur.execute(query, (project_id, str(version_id)))
+                    result = cur.fetchone()[0]
+            results = {"labels": result} if result else {"labels": {}}
+            result = dict(sorted(results["labels"].items(), key=lambda item: item[1], reverse=True))
+            return result
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return {"labels": {}}
+
 async def get_label_counts_json(project_id):
     """
-    Get the label counts for a given project
+    Get the label counts for a given project for all verified localizations
     :param project_id:
     :return:  JSON object with label counts sorted by count in descending order
     """

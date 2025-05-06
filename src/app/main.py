@@ -23,12 +23,12 @@ from app.ops.models import (
     LocClusterFilterModel,
     MediaIdFilterModel,
     DeleteFlagFilterModel,
-    LocIdFilterModel, MediaNameFilterModelBase,
+    LocIdFilterModel, MediaNameFilterModelBase, LabelFilterModel,
 )
 from app.ops.modifications import assign_cluster_media_label, assign_cluster_label, change_label_id
 from app.ops.utils import NotFoundException, init_api, get_projects, get_image_spec_version, \
     get_project_spec, get_version_id, get_media_count, get_localization_count, prepare_media_kwargs, get_media_list, \
-    get_localization, get_label_counts_json, check_media_args, get_tator_projects
+    get_localization, get_label_counts_json, check_media_args, get_tator_projects, get_label_counts_cluster
 from app.ops.deletions import del_media_id, del_locs_by_filter, del_locs_filename
 
 global projects
@@ -130,6 +130,33 @@ async def get_label_list(project_name: str):
         # Return a dictionary of labels/counts pairs
         label_count = await get_label_counts_json(spec.project_id)
         return {"labels": label_count}
+    except Exception as ex:
+        return {"message": f"Error: {ex}"}, 404
+
+
+@app.get("/labels/detail/{project_name}", status_code=status.HTTP_200_OK)
+async def get_label_list_detail(project_name: str, item: LabelFilterModel):
+    """
+    Get the list of unique labels associated with a Tator project and the count of each label.
+    :param project_name: the name of the project
+    :param api: The Tator API object.
+    :return: A list of labels and the count of each label optionally grouped by attribute.
+    """
+    try:
+        model = LabelFilterModel(**jsonable_encoder(item))  # Convert to a model
+        try:
+            spec = await get_project_spec(api, project_name)
+        except NotFoundException as ex:
+            return {"message": f"{ex._name} project not found. Is {ex._name} the correct project?"}, 404
+
+        version_id = await get_version_id(api, spec.project_id, model.version_name)
+        if version_id is None:
+            return {"message": f"No version found for project {project_name} with version { model.version_name}"}
+
+        # Return a dictionary of labels/counts pairs grouped by optional attribute (e.g. depth, altitude)
+        label_count = await get_label_counts_cluster(spec.project_id, version_id, model.attribute)
+        return {"labels": label_count}
+
     except Exception as ex:
         return {"message": f"Error: {ex}"}, 404
 
