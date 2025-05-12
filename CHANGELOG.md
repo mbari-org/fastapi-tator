@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v0.9.0 (2025-05-12)
+
+### Build System
+
+- Added provenance to docker build
+  ([`1d7ff65`](https://github.com/mbari-org/fastapi-tator/commit/1d7ff6554793200b12b50614853363048eb1f24f))
+
+### Features
+
+- Added labels by minimum score and summary to @app decorators for improved documentation
+  ([`6931376`](https://github.com/mbari-org/fastapi-tator/commit/6931376896f041cdb5e2c87dba5ce52e602db29c))
+
+
 ## v0.8.0 (2025-05-06)
 
 ### Features
