@@ -42,7 +42,11 @@ class MediaNameUnverifiedFilterModel(BaseModel):
 
 class LabelFilterModel(BaseModel):
     version_name: str | None = "Baseline"
-    attribute: str | None = None
+    attribute: str | None = "depth"
+
+class LabelScoreFilterModel(BaseModel):
+    version_name: str | None = "Baseline"
+    score: str | None = 0.5
 
 class LocIdFilterModel(BaseModel):
     loc_id: int | None = None

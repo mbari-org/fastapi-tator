@@ -23,12 +23,13 @@ from app.ops.models import (
     LocClusterFilterModel,
     MediaIdFilterModel,
     DeleteFlagFilterModel,
-    LocIdFilterModel, MediaNameFilterModelBase, LabelFilterModel,
+    LocIdFilterModel, MediaNameFilterModelBase, LabelFilterModel, LabelScoreFilterModel,
 )
 from app.ops.modifications import assign_cluster_media_label, assign_cluster_label, change_label_id
 from app.ops.utils import NotFoundException, init_api, get_projects, get_image_spec_version, \
     get_project_spec, get_version_id, get_media_count, get_localization_count, prepare_media_kwargs, get_media_list, \
-    get_localization, get_label_counts_json, check_media_args, get_tator_projects, get_label_counts_cluster
+    get_localization, get_label_counts_json, check_media_args, get_tator_projects, get_label_counts_cluster, \
+    get_label_counts_score
 from app.ops.deletions import del_media_id, del_locs_by_filter, del_locs_filename
 
 global projects
@@ -98,7 +99,9 @@ async def health():
         return {"message": f"Error: {ex}"}, 503
 
 
-@app.get("/projects", status_code=status.HTTP_200_OK)
+@app.get("/projects",
+         summary="Get a list of all Tator projects",
+         status_code=status.HTTP_200_OK)
 async def get_all_projects():
     try:
         all_projects = await get_projects(api)
@@ -113,13 +116,13 @@ async def get_all_projects():
         return {"message": f"Error: {ex}"}
 
 
-@app.get("/labels/{project_name}", status_code=status.HTTP_200_OK)
+@app.get("/labels/{project_name}",
+         summary="Get the list of unique labels associated with a Tator project and the count of each label.",
+         status_code=status.HTTP_200_OK)
 async def get_label_list(project_name: str):
     """
     Get the list of unique labels associated with a Tator project and the count of each label.
-    :param project_name: the name of the project
-    :param api: The Tator API object.
-    :return: A list of labels and the count of each label.
+    - **project_name**** the name of the project, e.g. 901902-uavs
     """ 
     try:
         spec = await get_project_spec(api, project_name)
@@ -134,13 +137,40 @@ async def get_label_list(project_name: str):
         return {"message": f"Error: {ex}"}, 404
 
 
-@app.get("/labels/detail/{project_name}", status_code=status.HTTP_200_OK)
-async def get_label_list_detail(project_name: str, item: LabelFilterModel):
+@app.post("/labels/score/{project_name}",
+          summary="Get labels with score greater than a threshold",
+          status_code=status.HTTP_200_OK)
+async def get_label_list_greater_than_score(project_name: str, item: LabelScoreFilterModel):
     """
     Get the list of unique labels associated with a Tator project and the count of each label.
-    :param project_name: the name of the project
-    :param api: The Tator API object.
-    :return: A list of labels and the count of each label optionally grouped by attribute.
+    - **project_name** the name of the project
+    """
+    try:
+        model = LabelScoreFilterModel(**jsonable_encoder(item))  # Convert to a model
+        try:
+            spec = await get_project_spec(api, project_name)
+        except NotFoundException as ex:
+            return {"message": f"{ex._name} project not found. Is {ex._name} the correct project?"}, 404
+
+        version_id = await get_version_id(api, spec.project_id, model.version_name)
+        if version_id is None:
+            return {"message": f"No version found for project {project_name} with version { model.version_name}"}
+
+        # Return a dictionary of labels/counts pairs grouped by label that are greater than the score
+        label_count = await get_label_counts_score(spec.project_id, version_id, model.score)
+        return {"labels": label_count}
+
+    except Exception as ex:
+        return {"message": f"Error: {ex}"}, 404
+
+@app.post("/labels/cluster/{project_name}",
+          summary="Get the list of unique labels associated with a Tator project and the count of each label.",
+          status_code=status.HTTP_200_OK)
+async def get_label_list_cluster_and_version(project_name: str, item: LabelFilterModel):
+    """
+    Get the list of unique labels associated with a Tator project and the count of each label.
+
+    - **project_name** the name of the project
     """
     try:
         model = LabelFilterModel(**jsonable_encoder(item))  # Convert to a model
@@ -161,7 +191,9 @@ async def get_label_list_detail(project_name: str, item: LabelFilterModel):
         return {"message": f"Error: {ex}"}, 404
 
 
-@app.post("/label/id/{label}", status_code=status.HTTP_200_OK)
+@app.post("/label/id/{label}",
+          summary="Assign a label to a localization by id",
+          status_code=status.HTTP_200_OK)
 async def assign_label_by_id(
         label: str, item: LocIdFilterModel, background_tasks: BackgroundTasks
 ):
@@ -196,7 +228,9 @@ async def assign_label_by_id(
     except Exception as ex:
         return {"message": f"Error: {ex}"}
 
-@app.post("/label/cluster/{label}", status_code=status.HTTP_200_OK)
+@app.post("/label/cluster/{label}",
+          summary="Assign a label to a localization by cluster name",
+          status_code=status.HTTP_200_OK)
 async def assign_label_by_cluster(
         label: str, model: LocClusterFilterModel, background_tasks: BackgroundTasks
 ):
@@ -251,7 +285,9 @@ async def assign_label_by_cluster(
 
 
 
-@app.post("/label/filename_cluster/{label}", status_code=status.HTTP_200_OK)
+@app.post("/label/filename_cluster/{label}",
+          summary="Assign a label to a localization by media filename and cluster name",
+          status_code=status.HTTP_200_OK)
 async def assign_label_by_media_filename_and_cluster(
         label: str, model: LocMediaClusterFilterModel, background_tasks: BackgroundTasks
 ):
@@ -329,7 +365,9 @@ async def assign_label_by_media_filename_and_cluster(
         return {"message": f"Error: {ex}"}
 
 
-@app.post("/media_count_by_filename", status_code=status.HTTP_200_OK)
+@app.post("/media_count_by_filename",
+          summary="Get the count of media by filename",
+          status_code=status.HTTP_200_OK)
 async def media_count_by_media_filename(item: MediaNameFilterModelBase):
     model = MediaNameFilterModelBase(**jsonable_encoder(item))  # Convert to a model
 
@@ -362,7 +400,9 @@ async def media_count_by_media_filename(item: MediaNameFilterModelBase):
     }
 
 
-@app.delete("/localizations/filename", status_code=status.HTTP_200_OK)
+@app.delete("/localizations/filename",
+            summary="Delete localizations by media filename and filter type Includes/Equals",
+            status_code=status.HTTP_200_OK)
 async def localizations_by_media_filename(item: MediaNameFilterModel, background_tasks: BackgroundTasks):
     model = MediaNameFilterModel(**jsonable_encoder(item))  # Convert to a model
 
@@ -416,7 +456,9 @@ async def localizations_by_media_filename(item: MediaNameFilterModel, background
         background_tasks.add_task(del_locs_filename, model=model, api=api, spec=spec, **loc_kwargs)
         return {"message": f"Queued deletion of localizations in medias by filename {model.media_name}"}
 
-@app.delete("/localizations/filename_label", status_code=status.HTTP_200_OK)
+@app.delete("/localizations/filename_label",
+            summary="Delete localizations by media filename Includes/Equals and label",
+            status_code=status.HTTP_200_OK)
 async def delete_localizations_by_media_filename_and_label(
         model: LocLabelFilterModel, background_tasks: BackgroundTasks
 ):
@@ -468,7 +510,9 @@ async def delete_localizations_by_media_filename_and_label(
     except Exception as ex:
         return {"message": f"Error: {ex}"}
 
-@app.delete("/localizations/filename_cluster", status_code=status.HTTP_200_OK)
+@app.delete("/localizations/filename_cluster",
+            summary="Delete localizations by media filename Includes/Equals and cluster name",
+            status_code=status.HTTP_200_OK)
 async def delete_localizations_by_media_filename_and_cluster(
         model: LocMediaClusterFilterModel, background_tasks: BackgroundTasks
 ):
@@ -517,7 +561,9 @@ async def delete_localizations_by_media_filename_and_cluster(
         return {"message": f"Error: {ex}"}
 
 
-@app.delete("/localizations/filename_saliency", status_code=status.HTTP_200_OK)
+@app.delete("/localizations/filename_saliency",
+            summary="Delete localizations by media filename Includes/Equals less than a saliency value",
+            status_code=status.HTTP_200_OK)
 async def delete_localizations_by_media_filename_and_low_saliency(
         model: LocSaliencyLabelFilterModel, background_tasks: BackgroundTasks
 ):
@@ -569,7 +615,9 @@ async def delete_localizations_by_media_filename_and_low_saliency(
     except Exception as ex:
         return {"message": f"Error: {ex}"}
 
-@app.delete("/localizations/id", status_code=status.HTTP_200_OK)
+@app.delete("/localizations/id",
+            summary="Delete localization by id",
+            status_code=status.HTTP_200_OK)
 async def delete_localizations_by_media_id(item: MediaIdFilterModel, background_tasks: BackgroundTasks):
 
     try:
@@ -599,7 +647,9 @@ async def delete_localizations_by_media_id(item: MediaIdFilterModel, background_
         return {"message": f"Error: {ex}"}
 
 
-@app.delete("/localizations/delete_flag", status_code=status.HTTP_200_OK)
+@app.delete("/localizations/delete_flag",
+            summary="Delete all localizations flagged for deletion",
+            status_code=status.HTTP_200_OK)
 async def delete_localizations_flagged_for_deletion(item: DeleteFlagFilterModel, background_tasks: BackgroundTasks):
     try:
         model = DeleteFlagFilterModel(**jsonable_encoder(item))
