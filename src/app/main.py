@@ -229,7 +229,7 @@ async def assign_label_by_id(
         return {"message": f"Error: {ex}"}
 
 @app.post("/label/cluster/{label}",
-          summary="Assign a label to a localization by cluster name",
+          summary="Assign a label to a localization by cluster name. Set the verified attribute to true (default), false, or leave off verified=true|false leave verified attribute as-is",
           status_code=status.HTTP_200_OK)
 async def assign_label_by_cluster(
         label: str, model: LocClusterFilterModel, background_tasks: BackgroundTasks
@@ -261,14 +261,22 @@ async def assign_label_by_cluster(
 
         # Clear the kwargs and add the media name filter
         kwargs.clear()
-        kwargs["attribute"] = [f"cluster::{model.cluster_name}", "verified::False"]
         if version_id:
             kwargs["version"] = [version_id]
-        num_boxes = await get_localization_count(api, spec, **kwargs)
+        counts = {}
+        for verified in ("True", "False"):
+            kwargs["attribute"] = [f"cluster::{model.cluster_name}", f"verified::{verified}"]
+            counts[verified] = await get_localization_count(api, spec, **kwargs)
+        if model.verify is not None:
+            kwargs["attribute"] = [f"cluster::{model.cluster_name}", f"verified::{str(bool(model.verify))}"]
+        else:
+            kwargs["attribute"] = [f"cluster::{model.cluster_name}"]
 
         if model.dry_run:
+            num_verified = counts["True"]
+            num_unverified = counts["False"]
             return {
-            "message": f'{num_boxes} unverified localizations in '
+            "message": f'{num_unverified} unverified {num_verified} verified localizations in '
                        f'cluster {model.cluster_name} and '
                        f'{model.version_name if version_id else "all versions"} in {num_media} medias'
         }
@@ -279,6 +287,7 @@ async def assign_label_by_cluster(
             return {
                 "message": f"Queued modification of localizations in cluster {model.cluster_name} and "
                            f'{model.version_name if version_id else "all versions"} to label {label}'
+                           f' and verify {model.verify if model.verify is not None else "unchanged"}'
             }
     except Exception as ex:
         return {"message": f"Error: {ex}"}
@@ -401,7 +410,7 @@ async def media_count_by_media_filename(item: MediaNameFilterModelBase):
 
 
 @app.delete("/localizations/filename",
-            summary="Delete localizations by media filename and filter type Includes/Equals",
+            summary="Delete localizations by media filename and filter type Includes/Equals. ONLY deletes unverified localizations",
             status_code=status.HTTP_200_OK)
 async def localizations_by_media_filename(item: MediaNameFilterModel, background_tasks: BackgroundTasks):
     model = MediaNameFilterModel(**jsonable_encoder(item))  # Convert to a model
@@ -457,7 +466,7 @@ async def localizations_by_media_filename(item: MediaNameFilterModel, background
         return {"message": f"Queued deletion of localizations in medias by filename {model.media_name}"}
 
 @app.delete("/localizations/filename_label",
-            summary="Delete localizations by media filename Includes/Equals and label",
+            summary="Delete localizations by media filename Includes/Equals and label. ONLY deletes unverified localizations",
             status_code=status.HTTP_200_OK)
 async def delete_localizations_by_media_filename_and_label(
         model: LocLabelFilterModel, background_tasks: BackgroundTasks
@@ -511,7 +520,7 @@ async def delete_localizations_by_media_filename_and_label(
         return {"message": f"Error: {ex}"}
 
 @app.delete("/localizations/filename_cluster",
-            summary="Delete localizations by media filename Includes/Equals and cluster name",
+            summary="Delete localizations by media filename Includes/Equals and cluster name. ONLY deletes unverified localizations",
             status_code=status.HTTP_200_OK)
 async def delete_localizations_by_media_filename_and_cluster(
         model: LocMediaClusterFilterModel, background_tasks: BackgroundTasks

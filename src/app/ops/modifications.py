@@ -97,13 +97,20 @@ async def assign_cluster_label(model: LocClusterFilterModel, label: str, api: ta
         num_modified += len(localizations)
         debug(f"Found {len(localizations)} localizations that include {model.cluster_name} ...")
 
-        # Bulk update boxes by IDs, set verified to True
+        # Bulk update boxes by IDs
         params = {"type": spec.box_type}
-        id_bulk_patch = {
-            "attributes": {"Label": label, "verified": True},
-            "ids": [l.id for l in localizations],
-            "in_place": 1,
-        }
+        if model.verify is None:
+            id_bulk_patch = {
+                "attributes": {"Label": label},
+                "ids": [l.id for l in localizations],
+                "in_place": 1,
+            }
+        else:
+            id_bulk_patch = {
+                "attributes": {"Label": label, "verified": model.verify},
+                "ids": [l.id for l in localizations],
+                "in_place": 1,
+            }
         try:
             info(id_bulk_patch)
             response = api.update_localization_list(project=spec.project_id, **params, localization_bulk_update=id_bulk_patch)
@@ -189,11 +196,18 @@ async def assign_cluster_media_label(model: LocMediaClusterFilterModel, label: s
 
         # Bulk update boxes by IDs, set verified to True
         params = {"type": spec.box_type}
-        id_bulk_patch = {
-            "attributes": {"Label": label, "verified": True},
-            "ids": [l.id for l in localizations],
-            "in_place": 1,
-        }
+        if model.verify is not None:
+            id_bulk_patch = {
+                "attributes": {"Label": label, "verified": model.verify},
+                "ids": [l.id for l in localizations],
+                "in_place": 1,
+            }
+        else:
+            id_bulk_patch = {
+                "attributes": {"Label": label},
+                "ids": [l.id for l in localizations],
+                "in_place": 1,
+            }
         try:
             info(id_bulk_patch)
             response = api.update_localization_list(project=spec.project_id, **params, localization_bulk_update=id_bulk_patch)

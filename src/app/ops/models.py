@@ -3,7 +3,9 @@
 # Description: models for common bulk operations on tator
 
 from enum import unique, Enum
-from pydantic import BaseModel
+from typing import Optional
+
+from pydantic import BaseModel, field_validator
 from app.conf import default_project
 
 
@@ -65,6 +67,13 @@ class LocClusterFilterModel(BaseModel):
     version_name: str | None = "Baseline"
     project_name: str | None = default_project
     dry_run: bool | None = True
+    verify: Optional[bool] = None
+
+    @field_validator('verify', mode='before')
+    def set_default_true_if_present(cls, v):
+        if v is None:
+            return None
+        return bool(v) if v != '' else True
 
 class LocMediaClusterFilterModel(BaseModel):
     filter_media: str | None = FilterType.Equals
