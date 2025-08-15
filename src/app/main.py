@@ -261,7 +261,7 @@ async def assign_label_by_cluster(
 
         # Clear the kwargs and add the media name filter
         kwargs.clear()
-        kwargs["attribute"] = [f"cluster::{model.cluster_name}"]
+        kwargs["attribute"] = [f"cluster::{model.cluster_name}", "verified::False"]
         if version_id:
             kwargs["version"] = [version_id]
         num_boxes = await get_localization_count(api, spec, **kwargs)
@@ -320,7 +320,7 @@ async def assign_label_by_media_filename_and_cluster(
 
         attribute_media =[f"$name::{model.media_name}"]
 
-        attribute_cluster = [f"cluster::{model.cluster_name}"]
+        attribute_cluster = [f"cluster::{model.cluster_name}", "verified::False"]
         kwargs = {"related_attribute": attribute_cluster}
         if attribute_media:
             if media_filter_type == FilterType.Includes:
