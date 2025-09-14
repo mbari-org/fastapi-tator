@@ -1,6 +1,7 @@
 [![MBARI](https://www.mbari.org/wp-content/uploads/2014/11/logo-mbari-3b.png)](http://www.mbari.org)
-[![Python](https://img.shields.io/badge/language-Python-blue.svg)](https://www.python.org/downloads/)
+[![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Python](https://img.shields.io/badge/language-Python-blue.svg)](https://www.python.org/downloads/)
 
 **fastapi-tator** A RESTful API for bulk operations on a Tator database on clustered, labeled, localization data.
 It uses the Python web framework [FastAPI](https://fastapi.tiangolo.com/). 
@@ -9,7 +10,7 @@ This accelerates machine learning workflows that use clustered, labeled, localiz
 
 It is currently live at http://mantis.shore.mbari.org:8001/docs.
 
-This API can, for example,
+Features
 -  Get a list of all unique labels for a given project
 -  Change a localization label in a given [sdcat](https://github.com/mbari-org/sdcat) generated cluster by query criteria, e.g. media (partial) name, model version
 -  Delete localizations with low saliency scores in a given project

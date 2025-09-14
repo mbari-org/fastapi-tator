@@ -31,6 +31,7 @@ from app.ops.utils import NotFoundException, init_api, get_projects, get_image_s
     get_localization, get_label_counts_json, check_media_args, get_tator_projects, get_label_counts_cluster, \
     get_label_counts_score
 from app.ops.deletions import del_media_id, del_locs_by_filter, del_locs_filename
+from prometheus_fastapi_instrumentator import Instrumentator
 
 global projects
 shutdown_flag = False
@@ -68,6 +69,8 @@ app = FastAPI(
     version=__version__,
     lifespan=lifespan
 )
+
+Instrumentator().instrument(app).expose(app)
 
 # Exception handler for 404 errors
 @app.exception_handler(NotFoundException)

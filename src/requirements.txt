@@ -6,3 +6,4 @@ httpx
 pytest
 pymssql~=2.2.8
 psycopg2-binary
+prometheus-fastapi-instrumentator
