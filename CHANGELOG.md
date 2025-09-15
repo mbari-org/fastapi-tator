@@ -2,6 +2,13 @@
 
 
 
+## v0.11.1 (2025-09-15)
+
+### Fix
+
+* fix: correct docker push in build and trigger release ([`19804e3`](https://github.com/mbari-org/fastapi-tator/commit/19804e38b4e5d20a9002c000e69882dcf1cd51db))
+
+
 ## v0.11.0 (2025-09-14)
 
 ### Feature
