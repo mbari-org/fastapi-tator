@@ -31,7 +31,7 @@ jobs:
           then
             VERSION=$(semantic-release version --print)
             echo "RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
-            echo "Releasing new version. Version:" $RELEASE_VERSION"
+            echo "Releasing new version. Version: $RELEASE_VERSION"
           else
             echo "Skipping release steps."
           fi
