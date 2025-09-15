@@ -2,6 +2,15 @@
 
 
 
+## v0.11.2 (2025-09-15)
+
+### Fix
+
+* fix: correct pass through VERSION ([`fca0978`](https://github.com/mbari-org/fastapi-tator/commit/fca097868b07d28d61a686605c5b8cef43f3e628))
+
+* fix: correct pass through VERSION ([`94e662b`](https://github.com/mbari-org/fastapi-tator/commit/94e662babd7a1c668643c49d07b9c9191e160398))
+
+
 ## v0.11.1 (2025-09-15)
 
 ### Fix
