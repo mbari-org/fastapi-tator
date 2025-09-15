@@ -43,7 +43,7 @@ jobs:
           semantic-release version --changelog
 
       - name: docker push version
-        if: steps.semantic.outputs.released == 'true'
+        if: steps.release-status.outputs.released == 'true'
         run: |
           export RELEASE_VERSION=$(echo ${{ steps.semantic.outputs.tag }} | cut -c 2-)
           docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
