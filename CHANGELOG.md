@@ -2,6 +2,13 @@
 
 
 
+## v0.11.3 (2025-12-11)
+
+### Fix
+
+* fix: handle null Labels ([`86dad2f`](https://github.com/mbari-org/fastapi-tator/commit/86dad2f0f68db41e38414159d05acf1f895682a9))
+
+
 ## v0.11.2 (2025-09-15)
 
 ### Fix
