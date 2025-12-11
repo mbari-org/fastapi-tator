@@ -400,7 +400,7 @@ async def get_label_counts_json(project_id):
         FROM (
             SELECT attributes->>'Label' AS label, COUNT(*) AS count
             FROM public.main_localization
-            WHERE attributes ? 'Label' AND project = %s AND attributes->>'verified' = 'true'
+            WHERE attributes ? 'Label' AND project = %s AND attributes->>'verified' = 'true' AND attributes->>'Label' IS NOT NULL
             GROUP BY attributes->>'Label'
         ) subquery;
         """

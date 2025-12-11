@@ -1,4 +1,32 @@
-# Get labels for a project #DONE
+
+## Get labels for a project ####902004-Planktivore
+POST http://127.0.0.1:8002/labels/detail/901103-biodiversity
+accept: application/json
+Content-Type: application/json
+
+{
+  "version_name": "megadetrt-mbari-i2map-vits-b-8-20250216-track",
+  "attribute": "depth"
+}
+
+
+### Get labels for a project ####902004-Planktivore'
+GET http://127.0.0.1:8002/labels/902004-Planktivore
+accept: application/json
+
+{
+  "labels": {
+    "RoboticArm": 1,
+    "Fish": 1,
+    "Urchin": 1
+  }
+}
+
+
+###
+
+
+# Get labels for a project #i2map
 GET http://127.0.0.1:8002/labels/i2map
 accept: application/json
 
