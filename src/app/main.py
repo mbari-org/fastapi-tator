@@ -2,11 +2,14 @@
 # Filename: app/main.py
 # Description: Runs a FastAPI server for common bulk operations on tator
 
+import os
 from contextlib import asynccontextmanager
 from pathlib import Path
+from typing import List
 
 from fastapi import FastAPI, status, Request, BackgroundTasks
 from fastapi.encoders import jsonable_encoder
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.openapi.utils import get_openapi
 
@@ -71,6 +74,22 @@ app = FastAPI(
 )
 
 Instrumentator().instrument(app).expose(app)
+
+# Origins allowed for CORS (e.g. when behind a reverse proxy). Comma-separated list via FASTAPI_TATOR_CORS_ORIGINS.
+CORS_ORIGINS: List[str] = []
+_cors_env = os.environ.get("FASTAPI_TATOR_CORS_ORIGINS", "").strip()
+if _cors_env:
+    CORS_ORIGINS.extend(origin.strip() for origin in _cors_env.split(",") if origin.strip())
+
+if CORS_ORIGINS:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=CORS_ORIGINS,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+        expose_headers=["*"],
+    )
 
 # Exception handler for 404 errors
 @app.exception_handler(NotFoundException)
