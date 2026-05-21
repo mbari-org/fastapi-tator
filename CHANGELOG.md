@@ -2,6 +2,13 @@
 
 
 
+## v0.11.4 (2026-05-21)
+
+### Fix
+
+* fix: added CORS support ([`8dd89fb`](https://github.com/mbari-org/fastapi-tator/commit/8dd89fbc6fe67c44173aaf62320b628081b172a4))
+
+
 ## v0.11.3 (2025-12-11)
 
 ### Fix
